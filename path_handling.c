@@ -4,7 +4,7 @@
  * find_command - searches for a command in the PATH environment variable
  * @command: the name of the command to search for
  *
- * Return: a string containing the full path to the command, 
+ * Return: a string containing the full path to the command,
  * or NULL if not found
  */
 char *find_command(char *command)

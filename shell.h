@@ -20,11 +20,11 @@ int _atoi(char *s);
 #define MAX_ARGUMENTS 64
 #define PATH_DELIMITER ":"
 
-int _printenv(char **env)
-int env_builtin(char **args, char **env)
-char *find_command(char *command)
-char *build_path(char *dir, char *command)
-int execute_command(char **command, char **envp)
-int built_exit(char **args)
+int _printenv(char **env);
+int env_builtin(char **args, char **env);
+char *find_command(char *command);
+char *build_path(char *dir, char *command);
+int execute_command(char **command, char **envp);
+int built_exit(char **args);
 
 #endif
