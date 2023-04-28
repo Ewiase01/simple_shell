@@ -1,71 +1,140 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#define MAX_LINE_LENGTH 1024
+#include "shell.h"
 
 /**
- * handle_line - handles the line
- *
- * @line: the line to be handled
- *
- * Return: output
+ * prompt - Print prompt and get user input.
  */
-
-void handle_line(char *line)
+void prompt(void)
 {
-	char *comment = strchr(line, '#');
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t read;
 
-	if (comment != NULL)
+	printf("($) ");
+
+	if (getline(&line, &len, stdin) == -1)
 	{
-		*comment = '\0';
+		if (isatty(STDIN_FILENO))
+			printf("\n");
+		exit(EXIT_SUCCESS);
 	}
-	printf("%s\n", line);
+
+	if (line[0] != '#' && line[0] != '\n')
+	{
+		/* Tokenize the input line */
+		char **args = malloc(sizeof(char *) * (read + 1));
+
+		if (args == NULL)
+		{
+			perror("Memory allocation error");
+			exit(EXIT_FAILURE);
+		}
+
+		tokenize(line, args);
+
+		/* Execute the command */
+		if (execute(args) == -1)
+		{
+			fprintf(stderr, "Command not found\n");
+		}
+
+		/* Free memory */
+		free(args);
+	}
+
+	free(line);
 }
 
 /**
- * main - main entry
- *
- * @argc: argument count
- * @argv: a pointer to an array
- *
- * Return: EXIT_SUCCESS
+ * tokenize - Tokenize a string into arguments.
+ * @line: Input string to tokenize.
+ * @args: Array of pointers to store the arguments.
  */
-
-int main(int argc, char **argv)
+void tokenize(char *line, char **args)
 {
-	int fd;
-	char *line = NULL;
-	size_t line_len = 0;
-	ssize_t read_len;
+	int i = 0;
+	char *token = strtok(line, " \t\n");
 
-	if (argc < 2)
+	while (token != NULL)
 	{
-		fd = STDIN_FILENO;
+		args[i++] = token;
+		token = strtok(NULL, " \t\n");
+	}
+
+	args[i] = NULL;
+}
+
+/**
+ * execute - Execute a command.
+ * @args: Array of pointers to the command and its arguments.
+ *
+ * Return: 0 on success, -1 on failure.
+ */
+int execute(char **args)
+{
+	pid_t pid;
+	int status;
+
+	pid = fork();
+
+	if (pid == 0)
+	{
+		/* Child process */
+		if (execvp(args[0], args) == -1)
+		{
+			perror("execvp error");
+			_exit(EXIT_FAILURE);
+		}
+	}
+	else if (pid < 0)
+	{
+		/* Error */
+		perror("fork error");
+		exit(EXIT_FAILURE);
 	}
 	else
 	{
-		fd = open(argv[1];
-				O_RDONLY);
-		if (fd < 0)
+		/* Parent process */
+		do {
+			waitpid(pid, &status, WUNTRACED);
+		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+	}
+
+	return (0);
+}
+
+/**
+ * sighandler - Signal handler for Ctrl+C.
+ * @sig_num: Signal number caught.
+ */
+void sighandler(int sig_num)
+{
+	signal(SIGINT, sighandler);
+	fflush(stdout);
+}
+
+/**
+ * main - Entry point.
+ * @argc: Argument count.
+ * @argv: Array of pointers to arguments.
+ *
+ * Return: Always 0.
+ */
+int main(int argc, char **argv)
+{
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t read;
+
+	/* Check if running in interactive mode */
+	if (isatty(STDIN_FILENO))
+	{
+		signal(SIGINT, sighandler);
+
+		while (1)
 		{
-			perror("open");
-			exit(EXIT_FAILURE);
+			prompt();
 		}
 	}
-
-	while ((read_len = getline(&line, &line_len, fd)) != -1)
+	/* Non-interactive mode */
+	else
 	{
-		handle_line(line);
-	}
-
-	if (line != NULL)
-	{
-		free(line);
-	}
-	return (EXIT_SUCCESS);
-}
