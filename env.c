@@ -9,7 +9,7 @@
  * @argv: pointer
  * @envp: pointer
  *
- * Return: Always 0
+ * Return: Always 0 on success
  */
 int main(int argc, char *argv[], char *envp[])
 {

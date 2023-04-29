@@ -83,7 +83,7 @@ int main(void)
 }
 
 /**
- * execute_command - excutes command
+ * execute_command - excutes a command
  *
  * @args: pointer
  */

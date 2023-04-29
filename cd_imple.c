@@ -40,7 +40,7 @@ void change_directory(char *path)
  * @argc: argument
  * @argv: pointer
  *
- * Return: 0 or 1
+ * Return: 0 or 1 on success
  */
 int main(int argc, char *argv[])
 {
