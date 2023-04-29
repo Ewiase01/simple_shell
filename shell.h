@@ -4,6 +4,7 @@
 int main(void);
 int main(int argc, char *argv[], char *envp[]);
 void change_directory(char *path);
-int main(int argc, char *argv[];
+int main(int argc, char *argv[]);
+void execute_command(char **args);
 
 #endif
